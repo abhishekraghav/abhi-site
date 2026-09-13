@@ -1,0 +1,538 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Abhi — Security Architecture Advisory</title>
+<meta name="description" content="Security architecture review, threat modeling and zero-trust design for teams running systems that can't afford to get it wrong.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#141F33;
+    --ink-soft:#3B4B63;
+    --paper:#EEF1EF;
+    --paper-raised:#E4E8E4;
+    --line:#C3CBC6;
+    --brass:#B4841A;
+    --brass-deep:#8F6710;
+    --blue:#5C7A99;
+    --max:1120px;
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:"Source Serif 4", Georgia, serif;
+    font-size:17px;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,.label,nav,.btn,.spec-code{
+    font-family:"Space Grotesk", Arial, sans-serif;
+  }
+  a{color:inherit;}
+  img{max-width:100%;display:block;}
+
+  ::selection{background:var(--brass);color:var(--paper);}
+
+  @media (prefers-reduced-motion: no-preference){
+    .draw-in{
+      stroke-dasharray:1400;
+      stroke-dashoffset:1400;
+      animation:draw 1.8s ease forwards;
+    }
+    @keyframes draw{ to{ stroke-dashoffset:0; } }
+    .fade-rise{ opacity:0; transform:translateY(14px); animation:rise .7s ease forwards .3s; }
+    @keyframes rise{ to{opacity:1; transform:translateY(0);} }
+  }
+
+  :focus-visible{
+    outline:2px solid var(--brass-deep);
+    outline-offset:3px;
+  }
+
+  .wrap{
+    max-width:var(--max);
+    margin:0 auto;
+    padding:0 28px;
+  }
+
+  /* ---------- nav ---------- */
+  header{
+    position:sticky; top:0; z-index:40;
+    background:rgba(238,241,239,0.92);
+    backdrop-filter:blur(6px);
+    border-bottom:1px solid var(--line);
+  }
+  .nav-row{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:18px 28px;
+    max-width:var(--max); margin:0 auto;
+  }
+  .brand{
+    font-weight:600; font-size:1.15rem; letter-spacing:0.01em;
+    text-decoration:none; color:var(--ink);
+  }
+  .brand span{ color:var(--brass-deep); }
+  .nav-links{
+    display:flex; gap:28px; list-style:none; margin:0; padding:0;
+    font-size:0.92rem;
+  }
+  .nav-links a{ text-decoration:none; color:var(--ink-soft); }
+  .nav-links a:hover{ color:var(--ink); }
+  .nav-cta{
+    border:1px solid var(--ink); padding:9px 18px; font-size:0.88rem;
+    text-decoration:none; color:var(--ink); white-space:nowrap;
+  }
+  .nav-cta:hover{ background:var(--ink); color:var(--paper); }
+  .nav-toggle{ display:none; }
+
+  @media (max-width:780px){
+    .nav-links{ display:none; }
+  }
+
+  /* ---------- hero ---------- */
+  .hero{
+    position:relative;
+    padding:88px 0 64px;
+    border-bottom:1px solid var(--line);
+    overflow:hidden;
+  }
+  .hero-grid{
+    position:absolute; inset:0;
+    opacity:0.5;
+    pointer-events:none;
+  }
+  .hero-inner{ position:relative; }
+  .kicker{
+    font-size:0.85rem; color:var(--ink-soft);
+    display:flex; align-items:center; gap:10px;
+    margin-bottom:22px;
+  }
+  .kicker .dot{
+    width:7px; height:7px; border-radius:50%;
+    background:var(--brass); display:inline-block;
+  }
+  h1{
+    font-size:clamp(2.3rem, 5vw, 3.6rem);
+    line-height:1.08;
+    font-weight:600;
+    max-width:15ch;
+    margin:0 0 26px;
+    letter-spacing:-0.01em;
+  }
+  .hero-sub{
+    max-width:52ch;
+    font-size:1.15rem;
+    color:var(--ink-soft);
+    margin:0 0 36px;
+  }
+  .hero-ctas{ display:flex; align-items:center; gap:20px; flex-wrap:wrap; margin-bottom:56px;}
+  .btn{
+    display:inline-block;
+    background:var(--ink); color:var(--paper);
+    padding:14px 26px;
+    text-decoration:none;
+    font-size:0.95rem; font-weight:500;
+    border:1px solid var(--ink);
+  }
+  .btn:hover{ background:var(--brass-deep); border-color:var(--brass-deep); }
+  .btn-note{ font-size:0.88rem; color:var(--ink-soft); }
+
+  .spec-row{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    border-top:1px solid var(--line);
+  }
+  .spec{
+    padding:22px 20px 0;
+    border-left:1px solid var(--line);
+  }
+  .spec:first-child{ border-left:none; padding-left:0; }
+  .spec-code{
+    font-size:0.75rem; color:var(--brass-deep);
+    letter-spacing:0.04em;
+    margin-bottom:8px;
+  }
+  .spec-value{
+    font-size:1.5rem; font-weight:600; margin-bottom:4px;
+  }
+  .spec-label{
+    font-size:0.88rem; color:var(--ink-soft);
+  }
+
+  @media (max-width:700px){
+    .spec-row{ grid-template-columns:1fr; }
+    .spec{ border-left:none; border-top:1px solid var(--line); padding:18px 0 0; }
+    .spec:first-child{ border-top:none; }
+  }
+
+  /* ---------- section basics ---------- */
+  section{ padding:76px 0; border-bottom:1px solid var(--line); }
+  .section-head{
+    display:flex; justify-content:space-between; align-items:flex-end;
+    gap:24px; margin-bottom:44px; flex-wrap:wrap;
+  }
+  .section-tag{
+    font-size:0.8rem; color:var(--brass-deep); margin-bottom:10px;
+  }
+  h2{
+    font-size:clamp(1.6rem,3vw,2.2rem);
+    font-weight:600; margin:0; max-width:20ch; letter-spacing:-0.01em;
+  }
+  .section-intro{
+    max-width:38ch; color:var(--ink-soft); font-size:1rem; margin:0;
+  }
+
+  /* ---------- services ---------- */
+  .services{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:1px;
+    background:var(--line);
+    border:1px solid var(--line);
+  }
+  .service{
+    background:var(--paper);
+    padding:30px 26px;
+    position:relative;
+  }
+  .service-code{
+    font-family:"Space Grotesk", sans-serif;
+    font-size:0.75rem; color:var(--ink-soft);
+    margin-bottom:18px;
+  }
+  .service h3{
+    font-size:1.1rem; font-weight:600; margin:0 0 10px;
+  }
+  .service p{
+    font-size:0.94rem; color:var(--ink-soft); margin:0;
+  }
+  @media (max-width:900px){ .services{ grid-template-columns:repeat(2,1fr);} }
+  @media (max-width:620px){ .services{ grid-template-columns:1fr;} }
+
+  /* ---------- about ---------- */
+  .about{
+    display:grid;
+    grid-template-columns:0.8fr 1.2fr;
+    gap:56px;
+    align-items:start;
+  }
+  .about-photo{
+    aspect-ratio:4/5;
+    background:
+      repeating-linear-gradient(0deg, var(--line) 0 1px, transparent 1px 24px),
+      repeating-linear-gradient(90deg, var(--line) 0 1px, transparent 1px 24px),
+      var(--paper-raised);
+    border:1px solid var(--line);
+    display:flex; align-items:center; justify-content:center;
+    color:var(--ink-soft); font-size:0.85rem; text-align:center; padding:20px;
+  }
+  .about-body p{ margin:0 0 18px; color:var(--ink-soft); }
+  .about-body p:first-child{ color:var(--ink); font-size:1.08rem; }
+  .about-list{
+    list-style:none; margin:26px 0 0; padding:0;
+    display:grid; gap:10px; font-size:0.92rem; color:var(--ink-soft);
+  }
+  .about-list li{ display:flex; gap:10px; }
+  .about-list li::before{
+    content:"—"; color:var(--brass-deep); flex:none;
+  }
+  @media (max-width:780px){ .about{ grid-template-columns:1fr; } }
+
+  /* ---------- testimonial ---------- */
+  .testimonial{
+    border-top:1px solid var(--line);
+    border-bottom:1px solid var(--line);
+    padding:60px 0;
+  }
+  blockquote{
+    margin:0; padding:0;
+    font-size:clamp(1.2rem,2.4vw,1.55rem);
+    line-height:1.5; max-width:44ch;
+    color:var(--ink);
+  }
+  .quote-attr{
+    margin-top:26px; font-family:"Space Grotesk",sans-serif;
+    font-size:0.88rem; color:var(--ink-soft);
+  }
+  .quote-attr strong{ color:var(--ink); }
+
+  /* ---------- engagements ---------- */
+  .plans{
+    display:grid; grid-template-columns:1fr 1fr; gap:1px;
+    background:var(--line); border:1px solid var(--line);
+  }
+  .plan{ background:var(--paper); padding:36px 32px; }
+  .plan-kind{ font-size:0.8rem; color:var(--brass-deep); margin-bottom:14px; }
+  .plan h3{ font-size:1.3rem; font-weight:600; margin:0 0 8px; }
+  .plan-terms{ font-size:0.9rem; color:var(--ink-soft); margin-bottom:22px; }
+  .plan ul{ list-style:none; margin:0 0 28px; padding:0; display:grid; gap:10px; font-size:0.94rem; }
+  .plan ul li{ display:flex; gap:10px; }
+  .plan ul li::before{ content:"→"; color:var(--brass-deep); flex:none; }
+  .plan-link{ font-size:0.9rem; text-decoration:underline; text-underline-offset:3px; }
+  @media (max-width:700px){ .plans{ grid-template-columns:1fr; } }
+
+  /* ---------- faq ---------- */
+  .faq{ max-width:70ch; }
+  .faq-item{ border-top:1px solid var(--line); padding:22px 0; }
+  .faq-item:last-child{ border-bottom:1px solid var(--line); }
+  .faq-item h3{ font-size:1.02rem; font-weight:600; margin:0 0 8px; }
+  .faq-item p{ margin:0; color:var(--ink-soft); font-size:0.96rem; }
+
+  /* ---------- footer ---------- */
+  footer{ padding:60px 0 40px; }
+  .foot-grid{
+    display:grid; grid-template-columns:1.4fr 1fr 1fr; gap:40px;
+    margin-bottom:50px;
+  }
+  .foot-brand p{ color:var(--ink-soft); font-size:0.95rem; max-width:34ch; }
+  .foot-col h4{
+    font-family:"Space Grotesk",sans-serif; font-size:0.82rem;
+    color:var(--ink-soft); margin:0 0 14px; font-weight:500;
+  }
+  .foot-col ul{ list-style:none; margin:0; padding:0; display:grid; gap:9px; font-size:0.92rem; }
+  .foot-col a{ text-decoration:none; }
+  .foot-col a:hover{ color:var(--brass-deep); }
+  .foot-bottom{
+    display:flex; justify-content:space-between; align-items:center;
+    border-top:1px solid var(--line); padding-top:22px;
+    font-size:0.82rem; color:var(--ink-soft); flex-wrap:wrap; gap:12px;
+  }
+  @media (max-width:780px){ .foot-grid{ grid-template-columns:1fr 1fr; } }
+  @media (max-width:520px){ .foot-grid{ grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="nav-row">
+    <a class="brand" href="#top">abhi<span>.</span></a>
+    <ul class="nav-links">
+      <li><a href="#about">About</a></li>
+      <li><a href="#services">Services</a></li>
+      <li><a href="#engagements">Engagements</a></li>
+      <li><a href="#faq">FAQ</a></li>
+    </ul>
+    <a class="nav-cta" href="#contact">Book a call</a>
+  </div>
+</header>
+
+<main id="top">
+
+  <section class="hero" style="border-bottom:1px solid var(--line);">
+    <svg class="hero-grid" width="100%" height="100%" viewBox="0 0 1120 520" preserveAspectRatio="none" aria-hidden="true">
+      <g stroke="#5C7A99" stroke-width="1">
+        <path class="draw-in" d="M0 60 H1120" opacity="0.25"/>
+        <path class="draw-in" d="M0 180 H1120" opacity="0.18"/>
+        <path class="draw-in" d="M0 300 H1120" opacity="0.18"/>
+        <path class="draw-in" d="M0 420 H1120" opacity="0.25"/>
+        <path class="draw-in" d="M840 0 V520" opacity="0.2"/>
+        <path class="draw-in" d="M980 0 V520" opacity="0.12"/>
+      </g>
+    </svg>
+    <div class="wrap hero-inner">
+      <div class="kicker fade-rise"><span class="dot"></span> Security architecture &amp; risk advisory</div>
+      <h1 class="fade-rise">Security architecture that holds up under real attacks</h1>
+      <p class="hero-sub fade-rise">I'm Abhi — I design and review security architecture for teams running systems where a bad assumption is expensive: payments, identity and large-scale infrastructure. I find where the design will actually break, and fix it before it ships.</p>
+      <div class="hero-ctas fade-rise">
+        <a class="btn" href="#contact">Book a security review call</a>
+        <span class="btn-note">30 minutes · no slides, just your architecture</span>
+      </div>
+
+      <div class="spec-row">
+        <div class="spec">
+          <div class="spec-code">SEC—01</div>
+          <div class="spec-value">10+ yrs</div>
+          <div class="spec-label">designing and reviewing security architecture</div>
+        </div>
+        <div class="spec">
+          <div class="spec-code">SEC—02</div>
+          <div class="spec-value">Payments &amp; identity</div>
+          <div class="spec-label">systems handling regulated, high-value traffic</div>
+        </div>
+        <div class="spec">
+          <div class="spec-code">SEC—03</div>
+          <div class="spec-value">Design-stage</div>
+          <div class="spec-label">focus — cheaper to fix on paper than in prod</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="services">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <div class="section-tag">Where I help</div>
+          <h2>What I take on</h2>
+        </div>
+        <p class="section-intro">Hands-on architecture work, not a checklist audit. I work in your systems, with your team, on the actual design.</p>
+      </div>
+
+      <div class="services">
+        <div class="service">
+          <div class="service-code">SEC—ARCH</div>
+          <h3>Security architecture review</h3>
+          <p>Line-by-line review of a system's design — trust boundaries, data flow, auth model — before or after it ships.</p>
+        </div>
+        <div class="service">
+          <div class="service-code">SEC—THRT</div>
+          <h3>Threat modeling</h3>
+          <p>Structured modeling of how your specific system fails, mapped to the controls that actually address it.</p>
+        </div>
+        <div class="service">
+          <div class="service-code">SEC—ZTNA</div>
+          <h3>Zero trust design</h3>
+          <p>Practical zero-trust rollouts scoped to what your team can actually operate, not the vendor version.</p>
+        </div>
+        <div class="service">
+          <div class="service-code">SEC—CLD</div>
+          <h3>Cloud security posture</h3>
+          <p>Identity, network and data controls across your cloud estate, prioritized by what's actually exploitable.</p>
+        </div>
+        <div class="service">
+          <div class="service-code">SEC—IR</div>
+          <h3>Incident readiness</h3>
+          <p>Tabletop exercises and response-plan reviews so the first real incident isn't the first time you've run it.</p>
+        </div>
+        <div class="service">
+          <div class="service-code">SEC—ADV</div>
+          <h3>Fractional security advisor</h3>
+          <p>Ongoing architecture ownership for teams that need senior security judgment without a full-time hire.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="about">
+    <div class="wrap about">
+      <div class="about-photo">Photo placeholder<br>— replace with a real photo —</div>
+      <div class="about-body">
+        <div class="section-tag">A little about me</div>
+        <h2 style="margin-bottom:22px;">I've spent my career on the systems that can't afford to be wrong.</h2>
+        <p>I'm a cybersecurity architect who's spent 10+ years designing and reviewing security for large-scale payments and infrastructure systems — the kind where a design flaw shows up as fraud, downtime or a regulator's phone call.</p>
+        <p>That work taught me most security failures trace back to an architecture decision made early, under time pressure, without the right person in the room. I try to be that person — early, specific, and focused on what will actually happen when someone attacks the system, not what a framework says should happen.</p>
+        <ul class="about-list">
+          <li>Background in cybersecurity architecture at a large payments organization</li>
+          <li>Focus on design-stage review — before controls get expensive to change</li>
+          <li>Works directly with engineering and architecture teams, not just security</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="testimonial">
+    <div class="wrap">
+      <blockquote>"Abhi found the trust-boundary issue in our onboarding flow that three prior reviews missed — and explained exactly why it mattered in terms our engineers could act on immediately."</blockquote>
+      <div class="quote-attr"><strong>[Client name]</strong> · [Title, Company] — placeholder, replace with a real reference</div>
+    </div>
+  </section>
+
+  <section id="engagements">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <div class="section-tag">Where to start</div>
+          <h2>Two ways to work together</h2>
+        </div>
+        <p class="section-intro">A fixed-scope review if you have one system in question, or ongoing coverage if you need it standing.</p>
+      </div>
+
+      <div class="plans">
+        <div class="plan">
+          <div class="plan-kind">fixed · two weeks</div>
+          <h3>Security Architecture Audit</h3>
+          <div class="plan-terms">One system, deep review, a prioritized fix list.</div>
+          <ul>
+            <li>Architecture and data-flow review</li>
+            <li>Threat model for the system in scope</li>
+            <li>Findings ranked by real-world exploitability</li>
+          </ul>
+          <a class="plan-link" href="#contact">Book a scoping call →</a>
+        </div>
+        <div class="plan">
+          <div class="plan-kind">per month</div>
+          <h3>Fractional Security Advisor</h3>
+          <div class="plan-terms">Ongoing architecture ownership, working with your team.</div>
+          <ul>
+            <li>Review new designs before they ship</li>
+            <li>Direct access for architecture decisions</li>
+            <li>Incident readiness and tabletop exercises</li>
+          </ul>
+          <a class="plan-link" href="#contact">Book an intro call →</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="faq">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <div class="section-tag">Before we talk</div>
+          <h2>Common questions</h2>
+        </div>
+      </div>
+      <div class="faq">
+        <div class="faq-item">
+          <h3>What kind of systems do you work on?</h3>
+          <p>Mostly payments, identity and other systems handling regulated or high-value data — but the review process applies to any system where the design matters more than the checklist.</p>
+        </div>
+        <div class="faq-item">
+          <h3>Do you work with my existing security team?</h3>
+          <p>Yes — I work alongside your security and engineering teams rather than replacing them, and I hand off findings in a form they can act on directly.</p>
+        </div>
+        <div class="faq-item">
+          <h3>What happens on the first call?</h3>
+          <p>You describe the system or concern, I ask about the parts that usually hide risk, and we agree on whether an audit or ongoing advisory is the better fit.</p>
+        </div>
+        <div class="faq-item">
+          <h3>What do I get at the end of an engagement?</h3>
+          <p>A written architecture review, a threat model where relevant, and a prioritized list of fixes — not just a slide deck of findings.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer id="contact" style="border-bottom:none;">
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="foot-brand">
+        <a class="brand" href="#top">abhi<span>.</span></a>
+        <p>I'm Abhi. I help teams design and review security architecture for systems that can't afford to get it wrong.</p>
+      </div>
+      <div class="foot-col">
+        <h4>Explore</h4>
+        <ul>
+          <li><a href="#about">About</a></li>
+          <li><a href="#services">Services</a></li>
+          <li><a href="#engagements">Engagements</a></li>
+          <li><a href="#faq">FAQ</a></li>
+        </ul>
+      </div>
+      <div class="foot-col">
+        <h4>Connect</h4>
+        <ul>
+          <li><a href="mailto:hello@example.com">hello@example.com — placeholder</a></li>
+          <li><a href="#">LinkedIn — placeholder ↗</a></li>
+          <li><a href="#">GitHub — placeholder ↗</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>© 2026 Abhi. All rights reserved.</span>
+      <span>Privacy Policy · Terms of Service</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
