@@ -132,7 +132,28 @@
     color:var(--ink-soft);
     margin:0 0 36px;
   }
-  .hero-ctas{ display:flex; align-items:center; gap:20px; flex-wrap:wrap; margin-bottom:56px;}
+  .hero-ctas{ display:flex; align-items:center; gap:20px; flex-wrap:wrap; }
+
+  .hero-cols{
+    display:grid; grid-template-columns:1.15fr 0.85fr;
+    gap:52px; align-items:start; margin-bottom:52px;
+  }
+  .photo-frame{
+    aspect-ratio:4/5;
+    background:
+      repeating-linear-gradient(0deg, var(--line) 0 1px, transparent 1px 24px),
+      repeating-linear-gradient(90deg, var(--line) 0 1px, transparent 1px 24px),
+      var(--paper-raised);
+    border:1px solid var(--line);
+    display:flex; align-items:center; justify-content:center;
+    color:var(--ink-soft); font-size:0.85rem; text-align:center; padding:20px;
+  }
+  .hero-photo .photo-frame{ aspect-ratio:4/5; }
+  .photo-cap{ margin-top:12px; font-size:0.85rem; color:var(--ink-soft); font-style:italic; }
+  @media (max-width:860px){
+    .hero-cols{ grid-template-columns:1fr; }
+    .hero-photo{ order:-1; max-width:340px; }
+  }
   .btn{
     display:inline-block;
     background:var(--ink); color:var(--paper);
@@ -223,16 +244,6 @@
     gap:56px;
     align-items:start;
   }
-  .about-photo{
-    aspect-ratio:4/5;
-    background:
-      repeating-linear-gradient(0deg, var(--line) 0 1px, transparent 1px 24px),
-      repeating-linear-gradient(90deg, var(--line) 0 1px, transparent 1px 24px),
-      var(--paper-raised);
-    border:1px solid var(--line);
-    display:flex; align-items:center; justify-content:center;
-    color:var(--ink-soft); font-size:0.85rem; text-align:center; padding:20px;
-  }
   .about-body p{ margin:0 0 18px; color:var(--ink-soft); }
   .about-body p:first-child{ color:var(--ink); font-size:1.08rem; }
   .about-list{
@@ -244,6 +255,17 @@
     content:"—"; color:var(--brass-deep); flex:none;
   }
   @media (max-width:780px){ .about{ grid-template-columns:1fr; } }
+
+  /* ---------- gallery ---------- */
+  .gallery{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:20px;
+  }
+  .gallery-item .photo-frame{ aspect-ratio:4/3; margin-bottom:10px; }
+  .gallery-cap{ font-size:0.85rem; color:var(--ink-soft); font-style:italic; }
+  @media (max-width:860px){ .gallery{ grid-template-columns:repeat(2,1fr); } }
+  @media (max-width:560px){ .gallery{ grid-template-columns:1fr; } }
 
   /* ---------- testimonial ---------- */
   .testimonial{
@@ -337,12 +359,20 @@
       </g>
     </svg>
     <div class="wrap hero-inner">
-      <div class="kicker fade-rise"><span class="dot"></span> Security architecture &amp; risk advisory</div>
-      <h1 class="fade-rise">Security architecture that holds up under real attacks</h1>
-      <p class="hero-sub fade-rise">I'm Abhishek — I design and review security architecture for teams running systems where a bad assumption is expensive: payments, identity and large-scale infrastructure. I find where the design will actually break, and fix it before it ships.</p>
-      <div class="hero-ctas fade-rise">
-        <a class="btn" href="#contact">Book a security review call</a>
-        <span class="btn-note">30 minutes · no slides, just your architecture</span>
+      <div class="hero-cols">
+        <div class="hero-text">
+          <div class="kicker fade-rise"><span class="dot"></span> Security architecture &amp; risk advisory</div>
+          <h1 class="fade-rise">Security architecture that holds up under real attacks</h1>
+          <p class="hero-sub fade-rise">I'm Abhishek — I design and review security architecture for teams running systems where a bad assumption is expensive: payments, identity and large-scale infrastructure. I find where the design will actually break, and fix it before it ships.</p>
+          <div class="hero-ctas fade-rise">
+            <a class="btn" href="#contact">Book a security review call</a>
+            <span class="btn-note">30 minutes · no slides, just your architecture</span>
+          </div>
+        </div>
+        <div class="hero-photo fade-rise">
+          <div class="photo-frame">Photo placeholder<br>— swap in a real portrait —</div>
+          <div class="photo-cap">Abhishek Raghav — replace with your own caption</div>
+        </div>
       </div>
 
       <div class="spec-row">
@@ -412,7 +442,7 @@
 
   <section id="about">
     <div class="wrap about">
-      <div class="about-photo">Photo placeholder<br>— replace with a real photo —</div>
+      <div class="photo-frame">Photo placeholder<br>— replace with a real photo —</div>
       <div class="about-body">
         <div class="section-tag">A little about me</div>
         <h2 style="margin-bottom:22px;">I've spent my career on the systems that can't afford to be wrong.</h2>
@@ -423,6 +453,44 @@
           <li>Focus on design-stage review — before controls get expensive to change</li>
           <li>Works directly with engineering and architecture teams, not just security</li>
         </ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="moments">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <div class="section-tag">Out in the world</div>
+          <h2>Talks, panels and working sessions</h2>
+        </div>
+        <p class="section-intro">A few moments from conferences, client work and the people I meet along the way.</p>
+      </div>
+      <div class="gallery">
+        <div class="gallery-item">
+          <div class="photo-frame">Photo placeholder</div>
+          <div class="gallery-cap">Speaking on zero-trust architecture — [Conference], [City]</div>
+        </div>
+        <div class="gallery-item">
+          <div class="photo-frame">Photo placeholder</div>
+          <div class="gallery-cap">Panel on payments security — [Event name]</div>
+        </div>
+        <div class="gallery-item">
+          <div class="photo-frame">Photo placeholder</div>
+          <div class="gallery-cap">On-site architecture review with a client team</div>
+        </div>
+        <div class="gallery-item">
+          <div class="photo-frame">Photo placeholder</div>
+          <div class="gallery-cap">Workshop on threat modeling — [Company/Event]</div>
+        </div>
+        <div class="gallery-item">
+          <div class="photo-frame">Photo placeholder</div>
+          <div class="gallery-cap">With [Name], [Title] at [Event]</div>
+        </div>
+        <div class="gallery-item">
+          <div class="photo-frame">Photo placeholder</div>
+          <div class="gallery-cap">Tabletop exercise walkthrough — [Client/Event]</div>
+        </div>
       </div>
     </div>
   </section>
@@ -522,7 +590,7 @@
         <h4>Connect</h4>
         <ul>
           <li><a href="mailto:hello@example.com">hello@example.com — placeholder</a></li>
-          <li><a href="#">LinkedIn — placeholder ↗</a></li>
+          <li><a href="https://www.linkedin.com/in/abraghav/" target="_blank" rel="noopener">LinkedIn ↗</a></li>
           <li><a href="#">GitHub — placeholder ↗</a></li>
         </ul>
       </div>
