@@ -1,0 +1,16 @@
+{
+  "name": "abhi-site",
+  "version": "1.0.0",
+  "description": "Security architecture advisory website",
+  "private": true,
+  "scripts": {
+    "dev": "python3 -m http.server 8000",
+    "build": "echo 'Static site - no build needed'"
+  },
+  "keywords": [],
+  "author": "Abhishek",
+  "license": "MIT",
+  "dependencies": {
+    "@vercel/speed-insights": "^2.0.0"
+  }
+}
