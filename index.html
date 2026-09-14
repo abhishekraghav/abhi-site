@@ -90,7 +90,7 @@
     max-width:var(--max); margin:0 auto;
   }
   .brand{
-    font-weight:600; font-size:1.15rem; letter-spacing:0.01em;
+    font-weight:600; font-size:1.1rem; letter-spacing:0.03em;
     text-decoration:none; color:var(--ink);
   }
   .brand span{ color:var(--brass-deep); }
@@ -235,12 +235,20 @@
   }
   .service{
     background:var(--paper);
-    padding:30px 26px;
+    padding:30px 26px 30px 24px;
+    border-left:4px solid var(--accent, var(--line));
     position:relative;
   }
+  .service--ai{ --accent:#2F7A72; }
+  .service--arch{ --accent:#B4841A; }
+  .service--threat{ --accent:#B5502D; }
+  .service--iam{ --accent:#3F6E96; }
+  .service--cloud{ --accent:#4B7A4E; }
+  .service--priv{ --accent:#7A4B76; }
+  .service--code{ --accent:#8A6F2E; }
   .service-code{
     font-family:"Space Grotesk", sans-serif;
-    font-size:0.75rem; color:var(--ink-soft);
+    font-size:0.75rem; color:var(--accent, var(--ink-soft));
     margin-bottom:18px;
   }
   .service h3{
@@ -349,7 +357,7 @@
 
 <header>
   <div class="nav-row">
-    <a class="brand" href="#top">abhishek<span>.</span></a>
+    <a class="brand" href="#top">ROOT<span>.</span>TRUST</a>
     <ul class="nav-links">
       <li><a href="#about">About</a></li>
       <li><a href="#services">Services</a></li>
@@ -417,41 +425,41 @@
           <div class="section-tag">Where I help</div>
           <h2>What I take on</h2>
         </div>
-        <p class="section-intro">Hands-on architecture work, not a checklist audit. I work in your systems, with your team, on the actual design.</p>
+        <p class="section-intro">Hands-on architecture work, not a checklist audit. I work in your systems, with your team, on the actual design. <span style="display:block; margin-top:8px; font-size:0.85rem;">Color-coded by domain.</span></p>
       </div>
 
       <div class="services">
-        <div class="service">
+        <div class="service service--ai">
           <div class="service-code">SEC—AI</div>
           <h3>AI / agentic security</h3>
           <p>Guardrails and threat modeling for agentic and generative AI workflows at enterprise scale.</p>
         </div>
-        <div class="service">
+        <div class="service service--arch">
           <div class="service-code">SEC—ARCH</div>
           <h3>Security architecture review</h3>
           <p>Review of SDS/LLDD design docs, trust boundaries and data flow — before or after a system ships.</p>
         </div>
-        <div class="service">
+        <div class="service service--threat">
           <div class="service-code">SEC—THRT</div>
           <h3>Threat modeling</h3>
           <p>STRIDE-based threat modeling with engineering teams, mapped to concrete risks and mitigations.</p>
         </div>
-        <div class="service">
+        <div class="service service--iam">
           <div class="service-code">SEC—IAM</div>
           <h3>IAM &amp; identity architecture</h3>
           <p>OAuth 2.0, OIDC, SAML and SSO design — federation, MFA, token handling, and secure API access.</p>
         </div>
-        <div class="service">
+        <div class="service service--cloud">
           <div class="service-code">SEC—CLD</div>
           <h3>Cloud &amp; container security</h3>
           <p>AWS security posture, container and Kubernetes hardening, secrets management, IaC review.</p>
         </div>
-        <div class="service">
+        <div class="service service--priv">
           <div class="service-code">SEC—PRIV</div>
           <h3>Privacy by design</h3>
           <p>GDPR and privacy risk assessments built into the SDLC, not bolted on before a release.</p>
         </div>
-        <div class="service">
+        <div class="service service--code">
           <div class="service-code">SEC—COD</div>
           <h3>Code review &amp; pen testing</h3>
           <p>Static analysis, OWASP Top 10 coverage, and hands-on penetration testing of applications and APIs.</p>
@@ -595,7 +603,7 @@
   <div class="wrap">
     <div class="foot-grid">
       <div class="foot-brand">
-        <a class="brand" href="#top">abhishek<span>.</span></a>
+        <a class="brand" href="#top">ROOT<span>.</span>TRUST</a>
         <p>I'm Abhishek. I help teams design and review security architecture for systems that can't afford to get it wrong.</p>
       </div>
       <div class="foot-col">
